@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; }
+        .success { color: green; }
+        .error { color: red; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Dashboard - Teste de APIs</h1>
+    
+    <div class="debug-section">
+        <h3>1. Teste API Clientes</h3>
+        <button onclick="testClientesAPI()">Testar API Clientes</button>
+        <div id="clientes-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>2. Teste API Produtos</h3>
+        <button onclick="testProdutosAPI()">Testar API Produtos</button>
+        <div id="produtos-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>3. Teste Elementos DOM</h3>
+        <button onclick="testDOMElements()">Testar Elementos</button>
+        <div id="dom-result"></div>
+    </div>
+
+    <div class="debug-section">
+        <h3>4. Simulação Dashboard</h3>
+        <div style="background: #f8f9fa; padding: 15px; margin: 10px 0;">
+            <h4>Cards de Teste:</h4>
+            <p>Total Clientes: <span id="totalClientes">0</span></p>
+            <p>Total Produtos: <span id="totalProdutos">0</span></p>
+            <p>Clientes Ativos: <span id="clientesAtivos">0</span></p>
+            <p>Produtos Ativos: <span id="produtosAtivos">0</span></p>
+        </div>
+        <button onclick="simulateDashboard()">Simular Dashboard</button>
+        <div id="dashboard-result"></div>
+    </div>
+
+    <script>
+        async function testClientesAPI() {
+            const resultDiv = document.getElementById('clientes-result');
+            resultDiv.innerHTML = '<p>Testando...</p>';
+            
+            try {
+                console.log('Fazendo requisição para API de clientes...');
+                const response = await fetch('api/clientes/read.php');
+                console.log('Resposta:', response.status, response.statusText);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Dados recebidos:', data);
+                    
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ API Clientes OK</p>
+                        <p>Status: ${response.status}</p>
+                        <p>Dados: <pre>${JSON.stringify(data, null, 2)}</pre></p>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Erro na API Clientes</p>
+                        <p>Status: ${response.status}</p>
+                        <p>Erro: ${errorText}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                resultDiv.innerHTML = `
+                    <p class="error">❌ Erro de conexão</p>
+                    <p>Erro: ${error.message}</p>
+                `;
+            }
+        }
+
+        async function testProdutosAPI() {
+            const resultDiv = document.getElementById('produtos-result');
+            resultDiv.innerHTML = '<p>Testando...</p>';
+            
+            try {
+                console.log('Fazendo requisição para API de produtos...');
+                const response = await fetch('api/produtos/read.php');
+                console.log('Resposta:', response.status, response.statusText);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Dados recebidos:', data);
+                    
+                    resultDiv.innerHTML = `
+                        <p class="success">✅ API Produtos OK</p>
+                        <p>Status: ${response.status}</p>
+                        <p>Dados: <pre>${JSON.stringify(data, null, 2)}</pre></p>
+                    `;
+                } else {
+                    const errorText = await response.text();
+                    resultDiv.innerHTML = `
+                        <p class="error">❌ Erro na API Produtos</p>
+                        <p>Status: ${response.status}</p>
+                        <p>Erro: ${errorText}</p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro:', error);
+                resultDiv.innerHTML = `
+                    <p class="error">❌ Erro de conexão</p>
+                    <p>Erro: ${error.message}</p>
+                `;
+            }
+        }
+
+        function testDOMElements() {
+            const resultDiv = document.getElementById('dom-result');
+            const elements = ['totalClientes', 'totalProdutos', 'clientesAtivos', 'produtosAtivos'];
+            
+            let results = '<h4>Teste de Elementos DOM:</h4>';
+            
+            elements.forEach(elementId => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    results += `<p class="success">✅ ${elementId}: Encontrado</p>`;
+                } else {
+                    results += `<p class="error">❌ ${elementId}: NÃO encontrado</p>`;
+                }
+            });
+            
+            resultDiv.innerHTML = results;
+        }
+
+        async function simulateDashboard() {
+            const resultDiv = document.getElementById('dashboard-result');
+            resultDiv.innerHTML = '<p>Simulando dashboard...</p>';
+            
+            try {
+                console.log('=== INICIANDO SIMULAÇÃO DASHBOARD ===');
+                
+                // Fazer requisições paralelas
+                const [clientesResponse, produtosResponse] = await Promise.all([
+                    fetch('api/clientes/read.php'),
+                    fetch('api/produtos/read.php')
+                ]);
+
+                let totalClientes = 0, totalProdutos = 0, clientesAtivos = 0, produtosAtivos = 0;
+                let logs = [];
+
+                // Processar clientes
+                if (clientesResponse.ok) {
+                    const clientesData = await clientesResponse.json();
+                    console.log('Dados clientes:', clientesData);
+                    
+                    const clientes = Array.isArray(clientesData) ? clientesData : (clientesData.records || []);
+                    totalClientes = clientes.length;
+                    clientesAtivos = clientes.filter(c => c.status === 'ativo').length;
+                    
+                    logs.push(`✅ Clientes processados: ${totalClientes} total, ${clientesAtivos} ativos`);
+                } else {
+                    logs.push(`❌ Erro ao carregar clientes: ${clientesResponse.status}`);
+                }
+
+                // Processar produtos
+                if (produtosResponse.ok) {
+                    const produtosData = await produtosResponse.json();
+                    console.log('Dados produtos:', produtosData);
+                    
+                    const produtos = Array.isArray(produtosData) ? produtosData : (produtosData.records || []);
+                    totalProdutos = produtos.length;
+                    produtosAtivos = produtos.filter(p => p.status === 'ativo').length;
+                    
+                    logs.push(`✅ Produtos processados: ${totalProdutos} total, ${produtosAtivos} ativos`);
+                } else {
+                    logs.push(`❌ Erro ao carregar produtos: ${produtosResponse.status}`);
+                }
+
+                // Atualizar elementos
+                updateElement('totalClientes', totalClientes);
+                updateElement('totalProdutos', totalProdutos);
+                updateElement('clientesAtivos', clientesAtivos);
+                updateElement('produtosAtivos', produtosAtivos);
+
+                logs.push('✅ Elementos DOM atualizados');
+
+                resultDiv.innerHTML = `
+                    <h4>Resultado da Simulação:</h4>
+                    ${logs.map(log => `<p>${log}</p>`).join('')}
+                    <p><strong>Dashboard atualizado com sucesso!</strong></p>
+                `;
+
+                console.log('=== SIMULAÇÃO CONCLUÍDA ===');
+
+            } catch (error) {
+                console.error('Erro na simulação:', error);
+                resultDiv.innerHTML = `
+                    <p class="error">❌ Erro na simulação: ${error.message}</p>
+                `;
+            }
+        }
+
+        function updateElement(elementId, value) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = value;
+                console.log(`Atualizou ${elementId} para: ${value}`);
+            } else {
+                console.error(`Elemento ${elementId} não encontrado!`);
+            }
+        }
+
+        // Executar teste inicial
+        window.addEventListener('load', () => {
+            console.log('Página carregada, executando testes...');
+            testDOMElements();
+        });
+    </script>
+</body>
+</html>

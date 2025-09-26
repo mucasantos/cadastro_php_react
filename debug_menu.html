@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Menu</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Menu Lateral</h1>
+    
+    <div class="debug">
+        <h3>Status do Debug:</h3>
+        <div id="debug-output">Iniciando...</div>
+    </div>
+
+    <button onclick="debugMenu()">Testar Menu</button>
+    <button onclick="debugSections()">Testar Seções</button>
+    <button onclick="debugJavaScript()">Testar JavaScript</button>
+
+    <script>
+        function log(message, type = 'info') {
+            const output = document.getElementById('debug-output');
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+            output.innerHTML += `<div class="${className}">${message}</div>`;
+            console.log(message);
+        }
+
+        function debugMenu() {
+            log('🔍 Testando elementos do menu...');
+            
+            // Verificar se os links do menu existem
+            const menuLinks = document.querySelectorAll('.sidebar-menu a');
+            log(`📋 Links do menu encontrados: ${menuLinks.length}`, menuLinks.length > 0 ? 'success' : 'error');
+            
+            // Verificar data-section
+            menuLinks.forEach((link, index) => {
+                const section = link.getAttribute('data-section');
+                log(`📌 Link ${index + 1}: data-section="${section}"`);
+            });
+            
+            // Verificar sidebar
+            const sidebar = document.querySelector('.sidebar');
+            log(`📱 Sidebar encontrada: ${sidebar ? 'SIM' : 'NÃO'}`, sidebar ? 'success' : 'error');
+        }
+
+        function debugSections() {
+            log('🔍 Testando seções de conteúdo...');
+            
+            const sections = document.querySelectorAll('.content-section');
+            log(`📋 Seções encontradas: ${sections.length}`, sections.length > 0 ? 'success' : 'error');
+            
+            sections.forEach((section, index) => {
+                const id = section.id;
+                const display = window.getComputedStyle(section).display;
+                log(`📌 Seção ${index + 1}: id="${id}", display="${display}"`);
+            });
+            
+            // Testar IDs específicos
+            const sectionIds = ['dashboard-content', 'clientes-content', 'produtos-content'];
+            sectionIds.forEach(id => {
+                const element = document.getElementById(id);
+                log(`🎯 ${id}: ${element ? 'ENCONTRADO' : 'NÃO ENCONTRADO'}`, element ? 'success' : 'error');
+            });
+        }
+
+        function debugJavaScript() {
+            log('🔍 Testando JavaScript...');
+            
+            // Verificar se as classes existem
+            log(`🏗️ SidebarManager: ${typeof SidebarManager !== 'undefined' ? 'DEFINIDA' : 'NÃO DEFINIDA'}`, typeof SidebarManager !== 'undefined' ? 'success' : 'error');
+            log(`🏗️ ClienteManager: ${typeof ClienteManager !== 'undefined' ? 'DEFINIDA' : 'NÃO DEFINIDA'}`, typeof ClienteManager !== 'undefined' ? 'success' : 'error');
+            
+            // Verificar instâncias globais
+            log(`🌐 window.sidebarManager: ${window.sidebarManager ? 'EXISTE' : 'NÃO EXISTE'}`, window.sidebarManager ? 'success' : 'error');
+            log(`🌐 window.clienteManager: ${window.clienteManager ? 'EXISTE' : 'NÃO EXISTE'}`, window.clienteManager ? 'success' : 'error');
+            
+            // Testar método setActiveSection
+            if (window.sidebarManager && typeof window.sidebarManager.setActiveSection === 'function') {
+                log('🧪 Testando setActiveSection("dashboard")...', 'warning');
+                try {
+                    window.sidebarManager.setActiveSection('dashboard');
+                    log('✅ setActiveSection executado sem erro', 'success');
+                } catch (error) {
+                    log(`❌ Erro em setActiveSection: ${error.message}`, 'error');
+                }
+            } else {
+                log('❌ setActiveSection não disponível', 'error');
+            }
+        }
+
+        // Executar debug automático
+        window.addEventListener('load', () => {
+            log('✅ Página carregada');
+            setTimeout(() => {
+                debugSections();
+                debugJavaScript();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
